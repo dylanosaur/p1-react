@@ -3,14 +3,14 @@
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
+  animation: App-logo-spin infinite 0.5s linear;
+  height: 20vmin;
   pointer-events: none;
 }
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: 20%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +32,106 @@
   }
 }
 
-#content-container { 
+#body{ 
+  width: 100%;
   display: flex;
   flex-direction:row;
 }
+
+#navbar { 
+  width:100%;
+  padding:0px;
+  margin:0px;
+  display: flex;
+  flex-direction:row;
+  flex-grow: 1;
+  align-items: stretch;
+  justify-content: space-evenly;
+}
+
+#navbar > * {
+  min-width: 0;
+  flex-grow: 1;
+}
+
+#content-container {
+  width:100%;
+  padding:0px;
+  margin:0px;
+  display: flex;
+  flex-direction:column;
+  flex-grow: 1;
+  align-items: stretch;
+  justify-content: space-evenly;
+}
+
+#form-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding:10px 10px 50px 10px; 
+  background-color: rgb(150, 218, 223);
+  height: 200px;
+}
+
+#form { 
+  margin: 6px;
+  line-height: 3.1;
+  background-color: rgb(150, 218, 223)
+}
+#form label, input { 
+  margin: auto 6px;
+  height: 30px;
+}
+#form select { 
+  margin: auto 6px;
+  height: 30px;
+}
+
+#form-container button { 
+  height: 30px;
+  margin: 15px 6px 2px 6px;
+
+}
+/* 
+#content-container form {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: stretch;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+form > * { 
+  justify-content: space-evenly;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+#content-container div { 
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 200px;
+  background-color: rgb(23, 118, 241);
+}
+
+#form > input, label, select { 
+  height: 76px;
+}
+
+#form-button { 
+  height: 68px;
+  
+}
+
+#form-container { 
+  vertical-align: middle;
+  align-items: center;
+}
+
+#content-container label { 
+  background-color:  rgb(103, 152, 216);
+  line-height: 4.5;
+}
+*/
