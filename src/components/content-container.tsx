@@ -7,6 +7,9 @@ import getRequest from '../utilities/getRequest'
 import UserReimbursementsTable from './UserReimbursementsTable';
 import UpdateReimbursementForm from './UpdateReimbursementForm';
 import UpdateReimbursementsTable from './UpdateReimbursementsTable';
+import patch from '../utilities/patch';
+import UpdateUsersTable from './UpdateUsersTable';
+import UpdateUsersForm from './UpdateUsersForm';
 
 
 
@@ -21,7 +24,10 @@ class ResultsTable extends React.Component<any, any> {
       case 'Submit Reimbursements':
         return (<UserReimbursementsTable reimbursements={this.props.reimbursements} />)
       case 'Update Reimbursements':
-        return (<UpdateReimbursementsTable reimbursements={this.props.reimbursements} />)
+        return (<UpdateReimbursementsTable reimbursements={this.props.reimbursements} updateReimbursement={this.props.updateFunction}/>)
+      case 'Update Users':
+        return (<UpdateUsersTable users={this.props.users} updateUser={this.props.updateFunction}/>)
+      
       default:
         return <div>Yoyoyo</div>
     }
@@ -38,6 +44,8 @@ class Form extends React.Component<any, any> {
         return <SubmitReimbursementForm submitReimbursement={this.props.submitAction} />
       case 'Update Reimbursements':
         return <UpdateReimbursementForm filterReimbursements={this.props.submitAction} />
+      case 'Update Users':
+        return <UpdateUsersForm filterUsers={this.props.submitAction} />
     }
   }
 }
@@ -47,7 +55,7 @@ export default class ContentContainer extends React.Component<any, any>{
   // main webpage container i.e. the body
   constructor(props: any) {
     super(props);
-    this.state = { currentView: 'Login', userid: 0, reimbursements: ['hello!'] }
+    this.state = { currentView: 'Login', userid: 0, reimbursements: ['hello!'], users: [] }
   }
 
 
@@ -80,6 +88,16 @@ export default class ContentContainer extends React.Component<any, any>{
     return response.reverse()
   }
 
+  getFilteredUsers = async (userid:any) => {
+    if (!this.state.userid) { return; }
+    console.log('getting users for', userid)
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users/' + userid||'';
+    console.log('using url', url);
+    let response = await getRequest('get', url)
+    console.log('found some users', response);
+    return response
+  }
+
   submitReimbursement = async (amount: string, type: string, description: string) => {
     const typeid: any = { 'Lodging': 1, 'Travel': 2, 'Food': 3, 'Other': 4 }
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements';
@@ -110,10 +128,29 @@ export default class ContentContainer extends React.Component<any, any>{
     return response
   }
 
+  filterUsers = async (filters:any) => {
+
+    let users = await this.getFilteredUsers(filters.userid);
+    if (filters.userid){ users = [users]}
+    console.log(filters, users)
+    if (filters.email) {
+      users = users.filter((x:any) => x.email.includes(filters.email))
+    }
+    users.sort((a:any,b:any) => (a.userId-b.userId))
+    this.setState({
+        ...this.state,
+        users: users,
+        userFilters: filters
+    })
+  }
+
   filterReimbursements = async (filters: any) => {
     // filters is an object with various reimbursement fields and some specifier that selects reimbursements
     // with data whose fields contain the subset in the corrresponding filter field
-
+    this.setState({
+      ...this.state,
+      filters: filters
+    })
     console.log(filters)
     // for now we will just filter by userid and status, since that is all the endpoints allow access to
     if (!filters.userid && !filters.status) {
@@ -159,6 +196,23 @@ export default class ContentContainer extends React.Component<any, any>{
     }
   }
 
+  updateReimbursement =  async (reimbursementId:number, status:number) => {
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements'
+    const body = { "reimbursementId":reimbursementId, "statusId":status, "resolver":this.state.userid }
+    console.log('request has body', body);
+    let response = await patch(url, body);
+    console.log(response)
+    this.filterReimbursements(this.state.filters);
+  }
+
+  updateUser =  async (updateUserBody:any) => {
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users'
+    if (!updateUserBody.password) { delete updateUserBody.password }
+    console.log('request has body', updateUserBody);
+    let response = await patch(url, updateUserBody);
+    console.log(response)
+    this.filterUsers(this.state.userFilters);
+  }
 
   submitAction = () => {
     console.log('submit action for', this.state.currentView)
@@ -169,6 +223,18 @@ export default class ContentContainer extends React.Component<any, any>{
         return this.submitReimbursement
       case 'Update Reimbursements':
         return this.filterReimbursements
+      case 'Update Users':
+        return this.filterUsers
+    }
+  }
+
+  updateAction = () => {
+    console.log('submit action for', this.state.currentView)
+    switch (this.state.currentView) {
+      case 'Update Reimbursements':
+        return this.updateReimbursement
+      case 'Update Users':
+        return this.updateUser
     }
   }
 
@@ -179,12 +245,20 @@ export default class ContentContainer extends React.Component<any, any>{
             Should spread the full width of page, should have buttons that update/hide content being displayed */}
         <nav id="navbar">
           <NavItem view='Login' hidden={false} onClick={() => this.setState({ currentView: 'Login' })} />
-          <NavItem view='Submit Reimbursements' hidden={true} onClick={() => this.setState({ currentView: 'Submit Reimbursements' })} />
-          <NavItem view='Update Reimbursements' hidden={true} onClick={() => this.setState({ currentView: 'Update Reimbursements' })} />
+          <NavItem view='Submit Reimbursements' hidden={true} 
+            onClick={() => {
+              this.setState({ currentView: 'Submit Reimbursements' });
+              this.getUserReimbursements();
+            }} />
+          <NavItem view='Update Reimbursements'
+            onClick={() => {
+              this.setState({ currentView: 'Update Reimbursements', reimbursements: [] });
+            }} />
           <NavItem view='Update Users' hidden={true} onClick={() => this.setState({ currentView: 'Update Users' })} />
         </nav>
         <Form id='form' view={this.state.currentView} submitAction={this.submitAction()} />
-        <ResultsTable view={this.state.currentView} reimbursements={this.state.reimbursements} />
+        <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements} 
+          updateFunction={this.updateAction()}/>
       </div>
     );
   };

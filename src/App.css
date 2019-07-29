@@ -19,6 +19,11 @@
   color: white;
 }
 
+.visibility { 
+  visibility: hidden;
+  display: none;
+}
+
 .App-link {
   color: #61dafb;
 }

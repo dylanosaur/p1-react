@@ -1,7 +1,14 @@
 import React from 'react'
 
-export default class UserReimbursementsTable extends React.Component<any,any> { 
+export default class UpdateReimbursementsTable extends React.Component<any,any> { 
 
+  constructor(props:any){
+    super(props);
+    this.state = { 
+      props: []
+    }
+    console.log(this.props.reimbursements);
+  }
 
   convertUnixTime(time:string) { 
     if (!Number(time)){
@@ -11,7 +18,18 @@ export default class UserReimbursementsTable extends React.Component<any,any> {
     newDate.setTime(Number(time));
     return newDate.toUTCString().substring(0, 16);
   }
+  
+  updateInputValue = (event: any) => {
+    console.log(event)
+    let status:any = {'None':0, 'Pending':1, 'Approved':2, 'Denied':3}
+    let newState:any = {}
+    newState[event.target.id] = status[event.target.value];
+    this.setState({...this.state, ...newState})
+  }
+
+
   render() { 
+
     let type:any = {1:'Lodging', 2:'Travel', 3:'Food', 4:'Other'}
     let status:any = {1: 'Pending', 2: 'Approved', 3: 'Denied'}
     return(
@@ -32,7 +50,7 @@ export default class UserReimbursementsTable extends React.Component<any,any> {
           </thead>
             <tbody>
             {this.props.reimbursements.map((x:any) => 
-            <tr>
+            <tr key={'r'+x.reimbursementId}>
               <td>{x.reimbursementId}</td>
               <td>{x.author}</td>
               <td>{x.amount}</td>
@@ -41,7 +59,17 @@ export default class UserReimbursementsTable extends React.Component<any,any> {
               <td>{this.convertUnixTime(x.dateSubmitted)}</td>
               <td>{this.convertUnixTime(x.dateResolved)}</td>
               <td>{x.resolver}</td>
-              <td>{status[x.statusId]}</td>
+              <td>
+                <select id={'status'+x.reimbursementId} name='type' 
+                  value={status[this.state['status'+x.reimbursementId]||x.statusId]} onChange={this.updateInputValue} >
+                  <option value='Pending'>Pending</option>
+                  <option value='Approved'>Approved</option>
+                  <option value='Denied'>Denied</option>
+                </select>
+              </td>
+              <td>
+              <button id={'update'+x.reimbursementId} onClick={() => this.props.updateReimbursement(x.reimbursementId, this.state['status'+x.reimbursementId])}>Submit</button>
+              </td>
             </tr>)}
           </tbody>
         </table>

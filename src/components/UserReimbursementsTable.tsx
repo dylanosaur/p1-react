@@ -31,7 +31,7 @@ export default class UserReimbursementsTable extends React.Component<any,any> {
           </thead>
             <tbody>
             {this.props.reimbursements.map((x:any) => 
-            <tr>
+            <tr key={'r'+x.reimbursementId}>
               <td>{x.reimbursementId}</td>
               <td>{x.amount}</td>
               <td>{type[x.typeId]}</td>
