@@ -6,12 +6,7 @@ export default class UpdateReimbursementForm extends React.Component<any, any> {
       super(props);
       this.state = {
         userid: '',
-        author: '',
-        resolver: '',
-        firstname: '',
-        lastname: '',
         status: 'Pending',
-        type: 'None',
       }
     }
   

@@ -5,7 +5,7 @@ export default class UpdateReimbursementsTable extends React.Component<any,any> 
   constructor(props:any){
     super(props);
     this.state = { 
-      props: []
+      userid: 0,
     }
     console.log(this.props.reimbursements);
   }
@@ -68,7 +68,7 @@ export default class UpdateReimbursementsTable extends React.Component<any,any> 
                 </select>
               </td>
               <td>
-              <button id={'update'+x.reimbursementId} onClick={() => this.props.updateReimbursement(x.reimbursementId, this.state['status'+x.reimbursementId])}>Submit</button>
+              <button id={'update'+x.reimbursementId} onClick={() => this.props.updateReimbursement(x.reimbursementId, this.state['status'+x.reimbursementId]||x.statusId)}>Submit</button>
               </td>
             </tr>)}
           </tbody>

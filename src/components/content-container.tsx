@@ -24,10 +24,10 @@ class ResultsTable extends React.Component<any, any> {
       case 'Submit Reimbursements':
         return (<UserReimbursementsTable reimbursements={this.props.reimbursements} />)
       case 'Update Reimbursements':
-        return (<UpdateReimbursementsTable reimbursements={this.props.reimbursements} updateReimbursement={this.props.updateFunction}/>)
+        return (<UpdateReimbursementsTable reimbursements={this.props.reimbursements} updateReimbursement={this.props.updateFunction} />)
       case 'Update Users':
-        return (<UpdateUsersTable users={this.props.users} updateUser={this.props.updateFunction}/>)
-      
+        return (<UpdateUsersTable users={this.props.users} updateUser={this.props.updateFunction} />)
+
       default:
         return <div>Yoyoyo</div>
     }
@@ -50,14 +50,79 @@ class Form extends React.Component<any, any> {
   }
 }
 
+class NavBar extends React.Component<any, any> {
+  render() {
+    console.log('using roleid', this.props.roleid)
+    switch (this.props.roleid) {
+      case 2:
+        return (
+          <nav>
+            <NavItem view='Login' onClick={() => this.props.setView('Login')} />
+            <NavItem view='Submit Reimbursements'
+              onClick={() => {
+                this.props.setView('Submit Reimbursements');
+                this.props.getUserReimbursements();
+              }} />
+            <NavItem view='Update Reimbursements' onClick={() => {
+              console.log('setting view to update')
+              this.props.setReimbursements([]);
+              this.props.setView('Update Reimbursements');
+            }} />
+          </nav>
+        )
+      case 1:
+        return (
+          <nav>
+            <NavItem view='Login' onClick={() => this.props.setView('Login')} />
+            <NavItem view='Submit Reimbursements'
+              onClick={() => {
+                this.props.setView('Submit Reimbursements');
+                this.props.getUserReimbursements();
+              }} />
+            <NavItem view='Update Users' onClick={() => this.props.setView('Update Users')} />
+          </nav>
+        )
+      case 0:
+        return (
+          <nav>
+            <NavItem view='Login' onClick={() => this.props.setView('Login')} />
+          </nav>
+        )
+      default:
+        console.log('using default view');
+        return (
+          <nav>
+            <NavItem view='Login' hidden={false} onClick={() => this.props.setView('Login')} />
+            <NavItem view='Submit Reimbursements'
+              onClick={() => {
+                this.props.setView('Submit Reimbursements');
+                this.props.getUserReimbursements();
+              }} />
+          </nav>
+        )
+    }
+  }
+}
 
 export default class ContentContainer extends React.Component<any, any>{
   // main webpage container i.e. the body
   constructor(props: any) {
     super(props);
-    this.state = { currentView: 'Login', userid: 0, reimbursements: ['hello!'], users: [] }
+    this.state = { currentView: 'Login', userid: 0, roleid:0, reimbursements: ['hello!'], users: [] }
   }
 
+  setView = (view: string) => {
+    this.setState({
+      ...this.state,
+      currentView: view
+    })
+  }
+  setReimbursements = (r: any) => {
+    this.setState({
+      ...this.state,
+      reimbursements: r
+    })
+  }
 
   getUserReimbursements = async () => {
     if (!this.state.userid) { return; }
@@ -66,6 +131,9 @@ export default class ContentContainer extends React.Component<any, any>{
     console.log('using url', url);
     let response = await getRequest('get', url)
     console.log('found some reimbursements', response);
+    if (response.msg) { 
+      response = []
+    }
     this.setState({
       ...this.state,
       reimbursements: response.reverse()
@@ -74,6 +142,8 @@ export default class ContentContainer extends React.Component<any, any>{
   }
 
   getFilteredReimbursements = async (filter: any) => {
+    console.log('starting getFilteredReimb as user', this.state.userid)
+    
     if (!this.state.userid) { return; }
     console.log('getting reimbursements for', filter)
     let filterURL: any = { 'userid': 'author/userId/', 'status': 'status/' }
@@ -88,10 +158,10 @@ export default class ContentContainer extends React.Component<any, any>{
     return response.reverse()
   }
 
-  getFilteredUsers = async (userid:any) => {
+  getFilteredUsers = async (userid: any) => {
     if (!this.state.userid) { return; }
     console.log('getting users for', userid)
-    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users/' + userid||'';
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users/' + userid || '';
     console.log('using url', url);
     let response = await getRequest('get', url)
     console.log('found some users', response);
@@ -128,35 +198,34 @@ export default class ContentContainer extends React.Component<any, any>{
     return response
   }
 
-  filterUsers = async (filters:any) => {
+  filterUsers = async (filters: any) => {
 
     let users = await this.getFilteredUsers(filters.userid);
-    if (filters.userid){ users = [users]}
+    if (filters.userid) { users = [users] }
     console.log(filters, users)
     if (filters.email) {
-      users = users.filter((x:any) => x.email.includes(filters.email))
+      users = users.filter((x: any) => x.email.includes(filters.email))
     }
-    users.sort((a:any,b:any) => (a.userId-b.userId))
+    users.sort((a: any, b: any) => (a.userId - b.userId))
     this.setState({
-        ...this.state,
-        users: users,
-        userFilters: filters
+      ...this.state,
+      users: users,
+      userFilters: filters
     })
   }
 
   filterReimbursements = async (filters: any) => {
     // filters is an object with various reimbursement fields and some specifier that selects reimbursements
     // with data whose fields contain the subset in the corrresponding filter field
+    filters = filters||{userid:0, status:'Pending'}
     this.setState({
       ...this.state,
       filters: filters
     })
-    console.log(filters)
+    
+    console.log(this.state.filters)
     // for now we will just filter by userid and status, since that is all the endpoints allow access to
-    if (!filters.userid && !filters.status) {
-      alert('please specify atleast one filter');
-      return;
-    };
+
     let statusOptions: any = { 'None': 0, 'Pending': 1, 'Approved': 2, 'Denied': 3 }
     let status: any = statusOptions[filters.status]
 
@@ -171,7 +240,9 @@ export default class ContentContainer extends React.Component<any, any>{
         })
       }
     }
+    console.log('before status conditional', status);
     if (status) {
+      console.log('beginning status conditional');
       newReimbursements_status = await this.getFilteredReimbursements({ field: 'status', value: status });
       if (!filters.userid) {
         this.setState({
@@ -196,16 +267,16 @@ export default class ContentContainer extends React.Component<any, any>{
     }
   }
 
-  updateReimbursement =  async (reimbursementId:number, status:number) => {
+  updateReimbursement = async (reimbursementId: number, status: number) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements'
-    const body = { "reimbursementId":reimbursementId, "statusId":status, "resolver":this.state.userid }
+    const body = { "reimbursementId": reimbursementId, "statusId": status, "resolver": this.state.userid }
     console.log('request has body', body);
     let response = await patch(url, body);
     console.log(response)
     this.filterReimbursements(this.state.filters);
   }
 
-  updateUser =  async (updateUserBody:any) => {
+  updateUser = async (updateUserBody: any) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users'
     if (!updateUserBody.password) { delete updateUserBody.password }
     console.log('request has body', updateUserBody);
@@ -229,7 +300,7 @@ export default class ContentContainer extends React.Component<any, any>{
   }
 
   updateAction = () => {
-    console.log('submit action for', this.state.currentView)
+    console.log('update action for', this.state.currentView)
     switch (this.state.currentView) {
       case 'Update Reimbursements':
         return this.updateReimbursement
@@ -242,23 +313,14 @@ export default class ContentContainer extends React.Component<any, any>{
     return (
       <div id="content-container">
         {/* Options: Login, Submit Reimbursement, Update Reimbursements, Update Users 
-            Should spread the full width of page, should have buttons that update/hide content being displayed */}
-        <nav id="navbar">
-          <NavItem view='Login' hidden={false} onClick={() => this.setState({ currentView: 'Login' })} />
-          <NavItem view='Submit Reimbursements' hidden={true} 
-            onClick={() => {
-              this.setState({ currentView: 'Submit Reimbursements' });
-              this.getUserReimbursements();
-            }} />
-          <NavItem view='Update Reimbursements'
-            onClick={() => {
-              this.setState({ currentView: 'Update Reimbursements', reimbursements: [] });
-            }} />
-          <NavItem view='Update Users' hidden={true} onClick={() => this.setState({ currentView: 'Update Users' })} />
-        </nav>
-        <Form id='form' view={this.state.currentView} submitAction={this.submitAction()} />
-        <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements} 
-          updateFunction={this.updateAction()}/>
+            Should spread the full width of page, should have buttons that update/hide content being displayed 
+            Results table should be refereshed when ever it is rendered, so we have a random key LUL*/}
+        <NavBar view={this.state.currentView} setView={this.setView} setReimbursements={this.setReimbursements}
+          getUserReimbursements={this.getUserReimbursements} roleid={this.state.roleid} />
+
+        <Form userid={this.state.userid} view={this.state.currentView} submitAction={this.submitAction()} />
+        <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements}
+          updateFunction={this.updateAction()} key={Math.random()}/>
       </div>
     );
   };
