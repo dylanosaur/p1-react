@@ -1,19 +1,15 @@
 import React from 'react';
 import LoginForm from './LoginForm'
 import SubmitReimbursementForm from './SubmitReimbursementForm'
-import NavItem from './NavItem'
-import request from '../utilities/request'
-import getRequest from '../utilities/getRequest'
 import UserReimbursementsTable from './UserReimbursementsTable';
 import UpdateReimbursementForm from './UpdateReimbursementForm';
 import UpdateReimbursementsTable from './UpdateReimbursementsTable';
-import patch from '../utilities/patch';
 import UpdateUsersTable from './UpdateUsersTable';
 import UpdateUsersForm from './UpdateUsersForm';
-
-
-
-
+import NavBar from './NavBar';
+import patch from '../utilities/patch';
+import request from '../utilities/request'
+import getRequest from '../utilities/getRequest'
 
 class ResultsTable extends React.Component<any, any> {
   render() {
@@ -34,7 +30,6 @@ class ResultsTable extends React.Component<any, any> {
   }
 }
 
-
 class Form extends React.Component<any, any> {
   render() {
     switch (this.props.view) {
@@ -50,47 +45,42 @@ class Form extends React.Component<any, any> {
   }
 }
 
-class NavBar extends React.Component<any, any> {
-  render() {
-    const Login = <NavItem view='Login' onClick={() => this.props.reset()} />
-    const SubmitReimbursement = <NavItem view='Submit Reimbursements' onClick={() => {
-      this.props.setView('Submit Reimbursements');
-      this.props.getUserReimbursements();
-    }} />
-    const UpdateReimbursements = <NavItem view='Update Reimbursements' onClick={() => {
-      this.props.setReimbursements([]);
-      this.props.setView('Update Reimbursements');
-    }} />
-    const UpdateUsers = <NavItem view='Update Users' onClick={() => this.props.setView('Update Users')} />
-    const Logout = <NavItem view='Logout' onClick={() => this.props.reset()} />
-    const Greeting = <div id='greeting'>Current User: {this.props.user['firstName']} {this.props.user['lastName']}</div>
-    console.log('using roleid', this.props.roleid)
-    switch (this.props.roleid) {
-      // finance manager view
-      case 2:
-        return <nav id='navbar'> {Login} {SubmitReimbursement} {UpdateReimbursements} {Logout} {Greeting} </nav>
-      // admin view
-      case 1:
-        return <nav id='navbar'> {Login} {SubmitReimbursement} {UpdateUsers} {Logout}  {Greeting} </nav>
-      // no userID view
-      case 0:
-        return  <nav id='navbar'> {Login} </nav>
-      // default - standard user view
-      default:
-        return <nav id='navbar'> {Login} {SubmitReimbursement} {Logout}  {Greeting} </nav>
-    }
-  }
-}
 
+
+// this class could be improved quite a lot 
+// here is a optional to-do list 
+
+// rewrite the methods for filtering and getting reimbursements / users
+// its 150 lines of code that could be compressed to 50 with refactoring out a few repeatedly used functions
+// and fixing the filtering methods with slick 1 line filters or using functions
+// the number of database calls can probably be reduced with better design
+
+// add some kind of pagination feature - either use a bootstrap paginated table class or build one yourself and maintain
+// the state in the container class - even just a single input that is 'display x results' is probably sufficient
+// should speed up rendering significantly and prevent mega scroll bar
+
+// delete cookies on logout - simple yes but not sure how
+
+// logout users automatically after 5 or 10 mins of inactivity
+
+// have the 'update reimbursements' page automically load only the pending reimbursements (as this is the default search option)
+
+// try to determine why sometimes everything renders twice and fix it
+
+// use personal getter/setters for messing with the state variables to improve readability and modularity
+
+// think more carefully about what happens when the responses return empty arrays or errors and handle them explicitly
+
+// re-order methods so code is less spaghettified and more linear in execution
 export default class ContentContainer extends React.Component<any, any>{
   // main webpage container i.e. the body
   constructor(props: any) {
     super(props);
-    this.state = { currentView: 'Login', userid: 0, roleid:0, reimbursements: ['hello!'], users: [], currentUser: {} }
+    this.state = { currentView: 'Login', userid: 0, roleid: 0, reimbursements: ['hello!'], users: [], currentUser: {} }
   }
 
-  setStateToDefault =  () => {
-    this.setState({currentView: 'Login', userid: 0, roleid:0, reimbursements: ['hello!'], users: [], currentUser: {} })
+  setStateToDefault = () => {
+    this.setState({ currentView: 'Login', userid: 0, roleid: 0, reimbursements: ['hello!'], users: [], currentUser: {} })
   }
 
   setView = (view: string) => {
@@ -113,8 +103,8 @@ export default class ContentContainer extends React.Component<any, any>{
     console.log('using url', url);
     let response = await getRequest('get', url)
     //console.log('found some reimbursements', response);
-    let data:any = []
-    try{ data = response.reverse() } 
+    let data: any = []
+    try { data = response.reverse() }
     catch{ }
     this.setState({
       ...this.state,
@@ -125,7 +115,7 @@ export default class ContentContainer extends React.Component<any, any>{
 
   getFilteredReimbursements = async (filter: any) => {
     console.log('starting getFilteredReimb as user', this.state.userid)
-    
+
     if (!this.state.userid) { return; }
     console.log('getting reimbursements for', filter)
     let filterURL: any = { 'userid': 'author/userId/', 'status': 'status/' }
@@ -133,8 +123,8 @@ export default class ContentContainer extends React.Component<any, any>{
     console.log('using url', url);
     let response = await getRequest('get', url)
     //console.log('found some reimbursements', response);
-    let data:any = []
-    try{ data = response.reverse() } 
+    let data: any = []
+    try { data = response.reverse() }
     catch{ }
     this.setState({
       ...this.state,
@@ -203,12 +193,12 @@ export default class ContentContainer extends React.Component<any, any>{
   filterReimbursements = async (filters: any) => {
     // filters is an object with various reimbursement fields and some specifier that selects reimbursements
     // with data whose fields contain the subset in the corrresponding filter field
-    filters = filters||{userid:0, status:'Pending'}
+    filters = filters || { userid: 0, status: 'Pending' }
     this.setState({
       ...this.state,
       filters: filters
     })
-    
+
     console.log(this.state.filters)
     // for now we will just filter by userid and status, since that is all the endpoints allow access to
 
@@ -298,16 +288,12 @@ export default class ContentContainer extends React.Component<any, any>{
   render() {
     return (
       <div id="content-container">
-        {/* Options: Login, Submit Reimbursement, Update Reimbursements, Update Users 
-            Should spread the full width of page, should have buttons that update/hide content being displayed 
-            Results table should be refereshed when ever it is rendered, so we have a random key LUL*/}
         <NavBar view={this.state.currentView} setView={this.setView} setReimbursements={this.setReimbursements}
           getUserReimbursements={this.getUserReimbursements} roleid={this.state.roleid} reset={this.setStateToDefault}
           user={this.state.currentUser} />
-
         <Form userid={this.state.userid} view={this.state.currentView} submitAction={this.submitAction()} />
         <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements}
-          updateFunction={this.updateAction()} key={Math.random()}/>
+          updateFunction={this.updateAction()} key={Math.random()} />
       </div>
     );
   };
