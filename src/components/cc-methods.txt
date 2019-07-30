@@ -1,0 +1,57 @@
+// this file will just help me work out the design of the content-container methods
+
+getUserReimbursements = async () return correctly ordered reimbursements, store reimbursements in state
+    get /reimbursements/author/** (using this.state.userid)
+    checks data quality/content
+    re-orders appropriately
+    store in state
+    return reimbursements
+
+getFilteredReimbursements = async (filter: any) return correctly ordered reimbursements, store reimbursements in state
+    get /reimbursements/**/** (using filters)
+    checks data quality/content
+    re-orders appropriately
+    store in state
+    return reimbursements
+
+getFilteredUsers = async (userid: any) return users list, userid is really a default value parameter
+
+submitReimbursement = async (amount: string, type: string, description: string) returns user reimbursements
+
+submitCredentials = async (username: string, password: string) sets state for userid, role, currentUser, sets currentView, returns current user data
+
+filterUsers = async (filters: any) sets state users, userFilters, 
+
+filterReimbursements = async (filters: any) sets state filters, reimbursements, return nothing
+
+updateReimbursement = async (reimbursementId: number, status: number) calls filter reimbursements
+
+updateUser = async (updateUserBody: any) calls filterUsers
+
+// new functions
+setView()
+
+postReimbursement()
+patchReimbursement()
+updateDisplayedReimbursements()
+    getReimbursements()
+    filterReimbursements()
+
+
+patchUser()
+updateDisplayedUsers():
+    getUsers()
+    filterUsers()
+
+
+// things I actually need
+
+// login submit - redirects to 'submit reimbursements' view, get reimb, filter by criteria, display on page
+
+// user form submit functions - get users, filter by search criteria, display on page
+// user table update function - patch user, get users, filter by search criteria, display on page
+
+// reim submit function - post reim, get reim, filter by search criteria, display on page
+
+// reim update form submit functions - get reimbs, filter by search criteria, display on page
+// reim update table update function - patch reim, get reim, filter by search criteria, display on page
