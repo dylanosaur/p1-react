@@ -23,25 +23,7 @@ export default class UpdateReimbursementForm extends React.Component<any, any> {
 
             <label htmlFor={'userid'}>User ID</label>
             <input type='text' id='userid' value={this.state.userid} onChange={this.updateInputValue} />
-            {/* 
-            <label htmlFor={'firstname'}>First Name</label>
-            <input type='text' id='firstname' value={this.state.firstname} onChange={this.updateInputValue} />
             
-            <label htmlFor={'lastname'}>Last Name</label>
-            <input type='text' id='lastname' value={this.state.lastname} onChange={this.updateInputValue} />
-            
-            <label htmlFor={'type'}>Type</label>
-            <select id='type' name='type' value={this.state.type} onChange={this.updateInputValue} >
-              <option value='None'>None</option>
-              <option value='Lodging'>Lodging</option>
-              <option value='Travel'>Travel</option>
-              <option value='Food'>Food</option>
-              <option value='Other'>Other</option>
-            </select>
-  
-            <label htmlFor={'resolver'}>Resolver</label>
-            <input type='text' id='resolver' value={this.state.resolver} onChange={this.updateInputValue} />
-            */}
             <label htmlFor={'status'}>Status</label>
             <select id='status' name='type' value={this.state.status} onChange={this.updateInputValue} >
               <option value='None'>None</option>

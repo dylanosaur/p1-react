@@ -11,8 +11,8 @@ const getRequest = async (httpMethod: string, url: string) => {
     })
     // read stream of data
     let data = await response.json();
-    console.log(`retrieve ${url} with method ${httpMethod} gives results:`);
-    console.log(data);
+    //console.log(`retrieve ${url} with method ${httpMethod} gives results:`);
+    //console.log(data);
     return data
 }
 
