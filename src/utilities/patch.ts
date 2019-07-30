@@ -16,7 +16,7 @@ const patch = async(url:string, body:any) => {
 
         // `withCredentials` indicates whether or not cross-site Access-Control requests
         // should be made using credentials
-        withCredentials: true, // default
+        withCredentials: true, 
     }
     await axios.patch(url, body, config)
     return

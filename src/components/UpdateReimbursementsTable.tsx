@@ -7,7 +7,6 @@ export default class UpdateReimbursementsTable extends React.Component<any,any> 
     this.state = { 
       userid: 0,
     }
-    //console.log(this.props.reimbursements);
   }
 
   convertUnixTime(time:string) { 

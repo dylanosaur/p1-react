@@ -2,25 +2,25 @@ import React from 'react'
 
 export default class SubmitReimbursementForm extends React.Component<any, any> {
 
-    constructor(props:any){
-      super(props);
-      this.state = {
-        amount: '5000000',
-        type: 'Lodging',
-        description: 'brief description here'
-      }
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      amount: '5000000',
+      type: 'Lodging',
+      description: 'brief description here'
     }
-  
-    updateInputValue = (event: any) => {
-      let newState: any = {}
-      newState[event.target.id] = event.target.value;
-      this.setState({ ...this.state, ...newState})
-    }
-  
-    render() { 
-      return(
-        <div id='form-container'>
-          <form id='form'>
+  }
+
+  updateInputValue = (event: any) => {
+    let newState: any = {}
+    newState[event.target.id] = event.target.value;
+    this.setState({ ...this.state, ...newState })
+  }
+
+  render() {
+    return (
+      <div id='form-container'>
+        <form id='form'>
           <label htmlFor={'amount'}>Amount (USD)</label>
           <input type='text' id='amount'
             value={this.state.amount} onChange={this.updateInputValue} />
@@ -34,9 +34,9 @@ export default class SubmitReimbursementForm extends React.Component<any, any> {
           <label htmlFor={'description'}>Description</label>
           <input type='text' id='description'
             value={this.state.description} onChange={this.updateInputValue} />
-          </form>
-          <button id='form-button' onClick={() => this.props.submitReimbursement(this.state.amount, this.state.type, this.state.description)}>Submit</button>
-        </div>
-      )
-    }
+        </form>
+        <button id='form-button' onClick={() => this.props.submitReimbursement(this.state.amount, this.state.type, this.state.description)}>Submit</button>
+      </div>
+    )
   }
+}
