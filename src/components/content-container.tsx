@@ -13,7 +13,7 @@ import getRequest from '../utilities/getRequest'
 
 class ResultsTable extends React.Component<any, any> {
   render() {
-    console.log(this.props.view)
+    console.log('rerendering Results table for view', this.props.view, 'found reimb array of length', this.props.reimbursements.length);
     switch (this.props.view) {
       case 'Login':
         return <div>Hello!</div>
@@ -32,6 +32,7 @@ class ResultsTable extends React.Component<any, any> {
 
 class Form extends React.Component<any, any> {
   render() {
+    console.log('rerendering Forms table for view', this.props.view);
     switch (this.props.view) {
       case 'Login':
         return <LoginForm submitCredentials={this.props.submitAction} />
@@ -49,11 +50,6 @@ class Form extends React.Component<any, any> {
 
 // this class could be improved quite a lot 
 // here is a optional to-do list 
-
-// rewrite the methods for filtering and getting reimbursements / users
-// its 150 lines of code that could be compressed to 50 with refactoring out a few repeatedly used functions
-// and fixing the filtering methods with slick 1 line filters or using functions
-// the number of database calls can probably be reduced with better design
 
 // add some kind of pagination feature - either use a bootstrap paginated table class or build one yourself and maintain
 // the state in the container class - even just a single input that is 'display x results' is probably sufficient
@@ -76,61 +72,116 @@ export default class ContentContainer extends React.Component<any, any>{
   // main webpage container i.e. the body
   constructor(props: any) {
     super(props);
-    this.state = { currentView: 'Login', userid: 0, roleid: 0, reimbursements: ['hello!'], users: [], currentUser: {} }
+    this.state = {
+      currentView: 'Login', userid: 0, roleid: 0, reimbursements: [], users: [],
+      currentUser: {}, filters: { userid: 0, status: 'Pending' }
+    }
   }
 
   setStateToDefault = () => {
-    this.setState({ currentView: 'Login', userid: 0, roleid: 0, reimbursements: ['hello!'], users: [], currentUser: {} })
+    this.setState({
+      currentView: 'Login', userid: 0, roleid: 0, reimbursements: [], users: [],
+      currentUser: {}, filters: { userid: 0, status: 'Pending' }
+    })
   }
 
+  setUser = (userData: any) => {
+    this.setState({
+      ...this.state,
+      userid: userData.userid,
+      roleid: userData.roleid,
+      currentUser: userData.currentUser
+    })
+  }
   setView = (view: string) => {
     this.setState({
       ...this.state,
       currentView: view
     })
   }
-  setReimbursements = (r: any) => {
+
+  setFilters = (filters: string) => {
     this.setState({
       ...this.state,
-      reimbursements: r
+      filters: filters
     })
+  }
+
+  setReimbursements = (reimbursements: any) => {
+    this.setState({
+      ...this.state,
+      reimbursements: reimbursements
+    })
+  }
+
+  getReimbursements = async (params: any) => {
+    const data: any = {};
+    const statuses: any = { 'None': 0, 'Pending': 1, 'Approved': 2, 'Denied': 3 }
+    const statusid = statuses[params.status]
+    const URL = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements/';
+    console.log('using filters', params)
+    if (!params.userid && !statusid){ 
+      data.reimbursements = [];
+      alert('Atleast one filter must be specified');
+    }
+    if (params.userid) {
+      let relativeURL = `author/userId/${params.userid}`;
+      data.userid = await getRequest('get', URL + relativeURL);
+      if (data.userid.msg || data.userid.error) { data.userid = [] }
+    }
+    if (statusid) {
+      let relativeURL = `status/${statusid}`;
+      data.statusid = await getRequest('get', URL + relativeURL);
+      if (data.statusid.msg || data.statusid.error) { data.roleid = [] }
+    }
+    if (statusid && params.userid) {
+      data.reimbursements = data.userid.filter((r: any) => data.statusid.includes(r));
+    } else { data.reimbursements = data.userid || data.statusid; }
+    if (!data.reimbursements) { data.reimbursements = await getRequest('get', URL) }
+    return data.reimbursements.reverse()
+  }
+
+  postReimbursement = async (amount: string, type: string, description: string) => {
+    const typeid: any = { 'Lodging': 1, 'Travel': 2, 'Food': 3, 'Other': 4 }
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements';
+    const body = JSON.stringify({ "reimbursementId": 0, "author": this.state.userid, "amount": amount, "typeId": typeid[type], "description": description })
+    console.log('request has body', body);
+    await request('post', url, body);
+  }
+
+  submitReimbursement = async (amount: string, type: string, description: string) => {
+    await this.postReimbursement(amount, type, description);
+    const reimbursements: any = await this.getReimbursements({ userid: this.state.userid });
+    this.setReimbursements(reimbursements);
   }
 
   getUserReimbursements = async () => {
-    if (!this.state.userid) { return; }
-    console.log('getting reimbursements for', this.state.userid)
-    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements/author/userId/' + this.state.userid;
-    console.log('using url', url);
-    let response = await getRequest('get', url)
-    //console.log('found some reimbursements', response);
-    let data: any = []
-    try { data = response.reverse() }
-    catch{ }
-    this.setState({
-      ...this.state,
-      reimbursements: data
-    })
-    return data
+    const reimbursements = await this.getReimbursements({ userid: this.state.userid })
+    console.log('found some reimbursements for user', reimbursements.length)
+    this.setReimbursements(reimbursements);
   }
 
-  getFilteredReimbursements = async (filter: any) => {
-    console.log('starting getFilteredReimb as user', this.state.userid)
+  filterReimbursements = async (filters: any) => {
+    this.setFilters(filters);
+    console.log('using filters', filters, 'for filterReimbursements method')
+    const reimbursements: any = await this.getReimbursements(filters);
+    console.log('filter reimbursements gives new # reimbursements', reimbursements.length)
+    this.setReimbursements(reimbursements);
+  }
 
-    if (!this.state.userid) { return; }
-    console.log('getting reimbursements for', filter)
-    let filterURL: any = { 'userid': 'author/userId/', 'status': 'status/' }
-    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements/' + filterURL[filter.field] + filter.value;
-    console.log('using url', url);
-    let response = await getRequest('get', url)
-    //console.log('found some reimbursements', response);
-    let data: any = []
-    try { data = response.reverse() }
-    catch{ }
-    this.setState({
-      ...this.state,
-      reimbursements: data
-    })
-    return data.reverse()
+  displayDefaultReimbursements = async () => {
+    const filters: any = { userid: 0, status: 'Pending' }
+    this.setFilters(filters)
+    await this.filterReimbursements({ userid: 0, status: 'Pending' });
+  }
+
+  updateReimbursement = async (reimbursementId: number, status: number) => {
+    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements'
+    const body = { "reimbursementId": reimbursementId, "statusId": status, "resolver": this.state.userid }
+    console.log('request has body', body);
+    await patch(url, body);
+    const reimbursements = await this.getReimbursements(this.state.filters);
+    this.setReimbursements(reimbursements);
   }
 
   getFilteredUsers = async (userid: any) => {
@@ -143,113 +194,33 @@ export default class ContentContainer extends React.Component<any, any>{
     return response
   }
 
-  submitReimbursement = async (amount: string, type: string, description: string) => {
-    const typeid: any = { 'Lodging': 1, 'Travel': 2, 'Food': 3, 'Other': 4 }
-    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements';
-    const body = JSON.stringify({ "reimbursementId": 0, "author": this.state.userid, "amount": amount, "typeId": typeid[type], "description": description })
-    console.log('request has body', body);
-    let response = await request('post', url, body)
-    this.getUserReimbursements();
-    return response
-  }
-
   submitCredentials = async (username: string, password: string) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/login'
     const body = JSON.stringify({ "username": username, "password": password })
     console.log('request has body', body);
-    let response = await request('post', url, body)
-    this.setState({
-      ...this.state,
-      userid: response['userId'],
-      roleid: response['roleId'],
-      currentUser: response
-    })
-    if (this.state.userid && this.state.roleid) {
-      this.getUserReimbursements();
-      this.setState({
-        ...this.state,
-        currentView: 'Submit Reimbursements'
-      })
+    try {
+      let response = await request('post', url, body)
+      this.setUser({ userid: response['userId'], roleid: response['roleId'], currentUser: response });
+      const reimbursements = await this.getReimbursements({ userid: response['userId'] });
+      this.setReimbursements(reimbursements);
+      this.setView('Submit Reimbursements');
+    } catch (error) {
+      console.log('login failed due to:', error);
+      alert('invalid credentials');
     }
-    return response
   }
 
   filterUsers = async (filters: any) => {
-
     let users = await this.getFilteredUsers(filters.userid);
     if (filters.userid) { users = [users] }
     console.log(filters, users)
-    if (filters.email) {
-      users = users.filter((x: any) => x.email.includes(filters.email))
-    }
+    if (filters.email) { users = users.filter((x: any) => x.email.includes(filters.email)) }
     users.sort((a: any, b: any) => (a.userId - b.userId))
     this.setState({
       ...this.state,
       users: users,
       userFilters: filters
     })
-  }
-
-  filterReimbursements = async (filters: any) => {
-    // filters is an object with various reimbursement fields and some specifier that selects reimbursements
-    // with data whose fields contain the subset in the corrresponding filter field
-    filters = filters || { userid: 0, status: 'Pending' }
-    this.setState({
-      ...this.state,
-      filters: filters
-    })
-
-    console.log(this.state.filters)
-    // for now we will just filter by userid and status, since that is all the endpoints allow access to
-
-    let statusOptions: any = { 'None': 0, 'Pending': 1, 'Approved': 2, 'Denied': 3 }
-    let status: any = statusOptions[filters.status]
-
-    let newReimbursements_status: any;
-    let newReimbursements_userid: any;
-    if (filters.userid) {
-      newReimbursements_userid = await this.getFilteredReimbursements({ field: 'userid', value: filters.userid });
-      if (!filters.status) {
-        this.setState({
-          ...this.state,
-          reimbursements: newReimbursements_userid.reverse()
-        })
-      }
-    }
-    console.log('before status conditional', status);
-    if (status) {
-      console.log('beginning status conditional');
-      newReimbursements_status = await this.getFilteredReimbursements({ field: 'status', value: status });
-      if (!filters.userid) {
-        this.setState({
-          ...this.state,
-          reimbursements: newReimbursements_status.reverse()
-        })
-      }
-    }
-    //console.log(newReimbursements_status, newReimbursements_userid);
-    let objectIncludes = (array: any[], object: any) => {
-      for (let element of array) {
-        if (JSON.stringify(element) === JSON.stringify(object)) { return true }
-      }
-      return false;
-    }
-    if (status && filters.userid) {
-      let newReimbursements = newReimbursements_status.filter((x: any) => objectIncludes(newReimbursements_userid, x))
-      this.setState({
-        ...this.state,
-        reimbursements: newReimbursements.reverse()
-      })
-    }
-  }
-
-  updateReimbursement = async (reimbursementId: number, status: number) => {
-    const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements'
-    const body = { "reimbursementId": reimbursementId, "statusId": status, "resolver": this.state.userid }
-    console.log('request has body', body);
-    await patch(url, body);
-    //console.log(response)
-    this.filterReimbursements(this.state.filters);
   }
 
   updateUser = async (updateUserBody: any) => {
@@ -262,7 +233,7 @@ export default class ContentContainer extends React.Component<any, any>{
   }
 
   submitAction = () => {
-    console.log('submit action for', this.state.currentView)
+    console.log('assigning submit action for', this.state.currentView)
     switch (this.state.currentView) {
       case 'Login':
         return this.submitCredentials
@@ -276,7 +247,7 @@ export default class ContentContainer extends React.Component<any, any>{
   }
 
   updateAction = () => {
-    console.log('update action for', this.state.currentView)
+    console.log('assigning update action for', this.state.currentView)
     switch (this.state.currentView) {
       case 'Update Reimbursements':
         return this.updateReimbursement
@@ -288,10 +259,10 @@ export default class ContentContainer extends React.Component<any, any>{
   render() {
     return (
       <div id="content-container">
-        <NavBar view={this.state.currentView} setView={this.setView} setReimbursements={this.setReimbursements}
+        <NavBar view={this.state.currentView} setView={this.setView} displayDefaultReimbursements={this.displayDefaultReimbursements}
           getUserReimbursements={this.getUserReimbursements} roleid={this.state.roleid} reset={this.setStateToDefault}
           user={this.state.currentUser} />
-        <Form userid={this.state.userid} view={this.state.currentView} submitAction={this.submitAction()} />
+        <Form userid={this.state.userid} view={this.state.currentView} submitAction={this.submitAction()} key={Math.random()} />
         <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements}
           updateFunction={this.updateAction()} key={Math.random()} />
       </div>
