@@ -143,13 +143,16 @@ export default class ContentContainer extends React.Component<any, any>{
     }
     if (statusid) {
       let relativeURL = `status/${statusid}`;
+      console.log(relativeURL);
       data.statusid = await getRequest('get', URL + relativeURL);
-      if (data.statusid.msg || data.statusid.error) { data.roleid = [] }
+      console.log('data.statusid', data.statusid)
+      if (data.statusid.msg || data.statusid.error) { data.statusid = [] }
     }
     if (statusid && params.userid) {
       data.reimbursements = data.userid.filter((r: any) => data.statusid.includes(r));
     } else { data.reimbursements = data.userid || data.statusid; }
     if (!data.reimbursements) { data.reimbursements = await getRequest('get', URL) }
+    console.log('found some reimbs', data.reimbursements)
     return data.reimbursements.reverse()
   }
 
@@ -177,7 +180,7 @@ export default class ContentContainer extends React.Component<any, any>{
     this.setFilters(filters);
     //console.log('using filters', filters, 'for filterReimbursements method')
     const reimbursements: any = await this.getReimbursements(filters);
-    //console.log('filter reimbursements gives new # reimbursements', reimbursements.length)
+    console.log('filter reimbursements gives new # reimbursements', reimbursements.length)
     this.setReimbursements(reimbursements);
   }
 
