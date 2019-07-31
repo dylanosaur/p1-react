@@ -93,6 +93,7 @@ export default class ContentContainer extends React.Component<any, any>{
       currentUser: userData.currentUser
     })
   }
+  
   setView = (view: string) => {
     this.setState({
       ...this.state,

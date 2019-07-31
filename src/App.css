@@ -77,6 +77,7 @@
   flex-grow: 1;
   align-items: stretch;
   justify-content: space-evenly;
+ 
 }
 
 #form-container {
@@ -84,14 +85,15 @@
   flex-direction: row;
   justify-content: center;
   padding:10px 10px 50px 10px; 
-  background-color: rgb(255, 171, 61);
+  background: linear-gradient( rgb(255, 143, 91), white);
+  /* background-color: rgb(255, 143, 91); */
   height: 200px;
 }
 
 #form { 
   margin: 6px;
   line-height: 3.1;
-  background-color:  rgb(255, 171, 61);
+  background-color: rgba(255, 143, 91, 0);
 }
 #form label, input { 
   margin: auto 6px;
