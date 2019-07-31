@@ -43,7 +43,7 @@ export default class UpdateReimbursementsTable extends React.Component<any,any> 
               <th scope="col">Description</th>
               <th scope="col">Date Submitted</th>
               <th scope="col">Date Resolved</th>
-              <th scope="col">Resolver</th>
+              <th scope="col">Resolver ID</th>
               <th scope="col">Status</th>
             </tr>
           </thead>
