@@ -18,7 +18,7 @@ export default class NavBar extends React.Component<any, any> {
     }}
       colorClass={(this.props.view === 'Update Reimbursements') ? 'dark' : 'light'} />
     const UpdateUsers = <NavItem view='Update Users' onClick={() => this.props.setView('Update Users')}
-      colorClass={(this.props.view === 'Update Users') ? 'light' : 'dark'} />
+      colorClass={(this.props.view === 'Update Users') ? 'dark' : 'light'} />
     const Logout = <NavItem view='Logout' onClick={() => this.props.reset()}
       colorClass={(this.props.view === 'Logout') ? 'dark' : 'light'} />
     const Greeting = <div id='greeting'>Current User: {this.props.user['firstName']} {this.props.user['lastName']}</div>
@@ -36,7 +36,7 @@ export default class NavBar extends React.Component<any, any> {
         return <nav id='navbar'> {Login} </nav>
       // default - standard user view
       default:
-        return <nav id='navbar'> {Login} {SubmitReimbursement} {Logout}  {Greeting} </nav>
+        return <nav id='navbar'> {Login} {SubmitReimbursement} {Logout} {Greeting} </nav>
     }
   }
 }

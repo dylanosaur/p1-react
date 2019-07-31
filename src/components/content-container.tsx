@@ -57,28 +57,15 @@ class Form extends React.Component<any, any> {
   }
 }
 
-
-
 // this class could be improved quite a lot 
 // here is a optional to-do list 
-
-// add some kind of pagination feature - either use a bootstrap paginated table class or build one yourself and maintain
-// the state in the container class - even just a single input that is 'display x results' is probably sufficient
-// should speed up rendering significantly and prevent mega scroll bar
 
 // delete cookies on logout - simple yes but not sure how
 
 // logout users automatically after 5 or 10 mins of inactivity
 
-// have the 'update reimbursements' page automically load only the pending reimbursements (as this is the default search option)
-
-// try to determine why sometimes everything renders twice and fix it
-
-// use personal getter/setters for messing with the state variables to improve readability and modularity
-
 // think more carefully about what happens when the responses return empty arrays or errors and handle them explicitly
 
-// re-order methods so code is less spaghettified and more linear in execution
 export default class ContentContainer extends React.Component<any, any>{
   // main webpage container i.e. the body
   constructor(props: any) {
@@ -133,7 +120,8 @@ export default class ContentContainer extends React.Component<any, any>{
 
   paginate =  (pile:any) => {
     let items:any = []
-    for (let i = 0; i < this.state.paginationValue; i++) { items.push(pile[i]); }
+    const maxPageReimbursements = Math.min(this.state.paginationValue, this.state.reimbursements.length);
+    for (let i = 0; i < maxPageReimbursements; i++) { items.push(pile[i]); }
     return items
   }
 
@@ -225,6 +213,7 @@ export default class ContentContainer extends React.Component<any, any>{
       let response = await request('post', url, body)
       this.setUser({ userid: response['userId'], roleid: response['roleId'], currentUser: response });
       const reimbursements = await this.getReimbursements({ userid: response['userId'] });
+      console.log('found n reimbursements', reimbursements.length, reimbursements)
       this.setReimbursements(reimbursements);
       this.setView('Submit Reimbursements');
     } catch (error) {

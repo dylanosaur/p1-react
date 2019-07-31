@@ -14,6 +14,7 @@ export default class UserReimbursementsTable extends React.Component<any, any> {
   render() {
     let type: any = { 1: 'Lodging', 2: 'Travel', 3: 'Food', 4: 'Other' }
     let status: any = { 1: 'Pending', 2: 'Approved', 3: 'Denied' }
+    console.log(this.props.reimbursements);
     return (
       <div id='user-reimbursement-table'>
         <table className="table table-hover">
