@@ -5,18 +5,25 @@ export default class NavBar extends React.Component<any, any> {
   render() {
     console.log('rerendering NavBar for role ID', this.props.roleid)
 
-    const Login = <NavItem view='Login' onClick={() => this.props.reset()} />
+    const Login = <NavItem view='Login' onClick={() => this.props.reset()}
+      colorClass={(this.props.view === 'Login') ? 'dark' : 'light'} />
     const SubmitReimbursement = <NavItem view='Submit Reimbursements' onClick={() => {
       this.props.setView('Submit Reimbursements');
       this.props.getUserReimbursements();
-    }} />
+    }}
+      colorClass={(this.props.view === 'Submit Reimbursements') ? 'dark' : 'light'} />
     const UpdateReimbursements = <NavItem view='Update Reimbursements' onClick={() => {
       this.props.displayDefaultReimbursements();
       this.props.setView('Update Reimbursements');
-    }} />
-    const UpdateUsers = <NavItem view='Update Users' onClick={() => this.props.setView('Update Users')} />
-    const Logout = <NavItem view='Logout' onClick={() => this.props.reset()} />
+    }}
+      colorClass={(this.props.view === 'Update Reimbursements') ? 'dark' : 'light'} />
+    const UpdateUsers = <NavItem view='Update Users' onClick={() => this.props.setView('Update Users')}
+      colorClass={(this.props.view === 'Update Users') ? 'light' : 'dark'} />
+    const Logout = <NavItem view='Logout' onClick={() => this.props.reset()}
+      colorClass={(this.props.view === 'Logout') ? 'dark' : 'light'} />
     const Greeting = <div id='greeting'>Current User: {this.props.user['firstName']} {this.props.user['lastName']}</div>
+
+
     switch (this.props.roleid) {
       // finance manager view
       case 2:

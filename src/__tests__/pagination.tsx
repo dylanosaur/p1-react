@@ -93,6 +93,7 @@ describe('ContentContainer', () => {
       expect(wrapper.find('input').props().value).toBe(50);
       wrapper.unmount();
     })
-
   })
+
+  // it would be nice to have the navbar turn grey when it is the active view
 })

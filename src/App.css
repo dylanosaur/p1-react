@@ -19,9 +19,12 @@
   color: white;
 }
 
-.visibility { 
-  visibility: hidden;
-  display: none;
+.light { 
+  background-color: white;
+}
+
+.dark {
+  background-color: lightgrey;
 }
 
 .App-link {
@@ -57,6 +60,7 @@
 #navbar > * {
   min-width: 0;
   flex-grow: 1;
+  border-width: 0px;
 }
 
 #content-container {
