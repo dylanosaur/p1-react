@@ -21,7 +21,7 @@ export default class PaginationBar extends React.Component<any, any> {
         return (
         <div id='pagination-div'>
             <input id='pagination-input' type='text' onChange={this.handleChange} value={this.state.value} onKeyPress={this.handleKeyDown}/>
-            <label htmlFor='pagination-input' >Reimbursements Displayed</label>
+            <label htmlFor='pagination-input' > &lt;-- Or Fewer Reimbursements Displayed</label>
         </div>
         )
     }
