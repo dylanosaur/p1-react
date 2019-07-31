@@ -10,17 +10,28 @@ import NavBar from './NavBar';
 import patch from '../utilities/patch';
 import request from '../utilities/request'
 import getRequest from '../utilities/getRequest'
+import PaginationBar from './PaginationBar';
 
 class ResultsTable extends React.Component<any, any> {
   render() {
-    console.log('rerendering Results table for view', this.props.view, 'found reimb array of length', this.props.reimbursements.length);
+    //console.log('rerendering Results table for view', this.props.view, 'found reimb array of length', this.props.reimbursements.length);
     switch (this.props.view) {
       case 'Login':
         return <div>Hello!</div>
       case 'Submit Reimbursements':
-        return (<UserReimbursementsTable reimbursements={this.props.reimbursements} />)
+        return (
+          <div>
+            <PaginationBar updatePagination={this.props.updatePagination} paginationValue={this.props.paginationValue}/>
+            <UserReimbursementsTable reimbursements={this.props.reimbursements} />
+          </div>
+        )
       case 'Update Reimbursements':
-        return (<UpdateReimbursementsTable reimbursements={this.props.reimbursements} updateReimbursement={this.props.updateFunction} />)
+        return (
+          <div>
+            <PaginationBar updatePagination={this.props.updatePagination} paginationValue={this.props.paginationValue}/>
+            <UpdateReimbursementsTable reimbursements={this.props.reimbursements} updateReimbursement={this.props.updateFunction} />
+          </div>
+        )
       case 'Update Users':
         return (<UpdateUsersTable users={this.props.users} updateUser={this.props.updateFunction} />)
 
@@ -32,7 +43,7 @@ class ResultsTable extends React.Component<any, any> {
 
 class Form extends React.Component<any, any> {
   render() {
-    console.log('rerendering Forms table for view', this.props.view);
+    //console.log('rerendering Forms table for view', this.props.view);
     switch (this.props.view) {
       case 'Login':
         return <LoginForm submitCredentials={this.props.submitAction} />
@@ -74,14 +85,16 @@ export default class ContentContainer extends React.Component<any, any>{
     super(props);
     this.state = {
       currentView: 'Login', userid: 0, roleid: 0, reimbursements: [], users: [],
-      currentUser: {}, filters: { userid: 0, status: 'Pending' }
+      currentUser: {}, filters: { userid: 0, status: 'Pending' },
+      paginationValue:25
     }
   }
 
   setStateToDefault = () => {
     this.setState({
       currentView: 'Login', userid: 0, roleid: 0, reimbursements: [], users: [],
-      currentUser: {}, filters: { userid: 0, status: 'Pending' }
+      currentUser: {}, filters: { userid: 0, status: 'Pending' },
+      paginationValue:25
     })
   }
 
@@ -114,12 +127,22 @@ export default class ContentContainer extends React.Component<any, any>{
     })
   }
 
+  updatePagination = (value:number) => {
+    this.setState({ ...this.state, paginationValue:value})
+  }
+
+  paginate =  (pile:any) => {
+    let items:any = []
+    for (let i = 0; i < this.state.paginationValue; i++) { items.push(pile[i]); }
+    return items
+  }
+
   getReimbursements = async (params: any) => {
     const data: any = {};
     const statuses: any = { 'None': 0, 'Pending': 1, 'Approved': 2, 'Denied': 3 }
     const statusid = statuses[params.status]
     const URL = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements/';
-    console.log('using filters', params)
+    //console.log('using filters', params)
     if (!params.userid && !statusid){ 
       data.reimbursements = [];
       alert('Atleast one filter must be specified');
@@ -145,7 +168,7 @@ export default class ContentContainer extends React.Component<any, any>{
     const typeid: any = { 'Lodging': 1, 'Travel': 2, 'Food': 3, 'Other': 4 }
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements';
     const body = JSON.stringify({ "reimbursementId": 0, "author": this.state.userid, "amount": amount, "typeId": typeid[type], "description": description })
-    console.log('request has body', body);
+    ////console.log('request has body', body);
     await request('post', url, body);
   }
 
@@ -157,15 +180,15 @@ export default class ContentContainer extends React.Component<any, any>{
 
   getUserReimbursements = async () => {
     const reimbursements = await this.getReimbursements({ userid: this.state.userid })
-    console.log('found some reimbursements for user', reimbursements.length)
+    //console.log('found some reimbursements for user', reimbursements.length)
     this.setReimbursements(reimbursements);
   }
 
   filterReimbursements = async (filters: any) => {
     this.setFilters(filters);
-    console.log('using filters', filters, 'for filterReimbursements method')
+    //console.log('using filters', filters, 'for filterReimbursements method')
     const reimbursements: any = await this.getReimbursements(filters);
-    console.log('filter reimbursements gives new # reimbursements', reimbursements.length)
+    //console.log('filter reimbursements gives new # reimbursements', reimbursements.length)
     this.setReimbursements(reimbursements);
   }
 
@@ -178,7 +201,7 @@ export default class ContentContainer extends React.Component<any, any>{
   updateReimbursement = async (reimbursementId: number, status: number) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/reimbursements'
     const body = { "reimbursementId": reimbursementId, "statusId": status, "resolver": this.state.userid }
-    console.log('request has body', body);
+    //console.log('request has body', body);
     await patch(url, body);
     const reimbursements = await this.getReimbursements(this.state.filters);
     this.setReimbursements(reimbursements);
@@ -186,11 +209,11 @@ export default class ContentContainer extends React.Component<any, any>{
 
   getFilteredUsers = async (userid: any) => {
     if (!this.state.userid) { return; }
-    console.log('getting users for', userid)
+    //console.log('getting users for', userid)
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users/' + userid || '';
-    console.log('using url', url);
+    //console.log('using url', url);
     let response = await getRequest('get', url)
-    //console.log('found some users', response);
+    ////console.log('found some users', response);
     return response
   }
 
@@ -206,14 +229,14 @@ export default class ContentContainer extends React.Component<any, any>{
       this.setView('Submit Reimbursements');
     } catch (error) {
       console.log('login failed due to:', error);
-      alert('invalid credentials');
+      //alert('invalid credentials');
     }
   }
 
   filterUsers = async (filters: any) => {
     let users = await this.getFilteredUsers(filters.userid);
     if (filters.userid) { users = [users] }
-    console.log(filters, users)
+    //console.log(filters, users)
     if (filters.email) { users = users.filter((x: any) => x.email.includes(filters.email)) }
     users.sort((a: any, b: any) => (a.userId - b.userId))
     this.setState({
@@ -226,14 +249,14 @@ export default class ContentContainer extends React.Component<any, any>{
   updateUser = async (updateUserBody: any) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users'
     if (!updateUserBody.password) { delete updateUserBody.password }
-    console.log('request has body', updateUserBody);
+    //console.log('request has body', updateUserBody);
     await patch(url, updateUserBody);
-    //console.log(response)
+    ////console.log(response)
     this.filterUsers(this.state.userFilters);
   }
 
   submitAction = () => {
-    console.log('assigning submit action for', this.state.currentView)
+    //console.log('assigning submit action for', this.state.currentView)
     switch (this.state.currentView) {
       case 'Login':
         return this.submitCredentials
@@ -247,7 +270,7 @@ export default class ContentContainer extends React.Component<any, any>{
   }
 
   updateAction = () => {
-    console.log('assigning update action for', this.state.currentView)
+    //console.log('assigning update action for', this.state.currentView)
     switch (this.state.currentView) {
       case 'Update Reimbursements':
         return this.updateReimbursement
@@ -259,12 +282,27 @@ export default class ContentContainer extends React.Component<any, any>{
   render() {
     return (
       <div id="content-container">
-        <NavBar view={this.state.currentView} setView={this.setView} displayDefaultReimbursements={this.displayDefaultReimbursements}
-          getUserReimbursements={this.getUserReimbursements} roleid={this.state.roleid} reset={this.setStateToDefault}
+        <NavBar 
+          view={this.state.currentView} 
+          setView={this.setView} 
+          displayDefaultReimbursements={this.displayDefaultReimbursements}
+          getUserReimbursements={this.getUserReimbursements} 
+          roleid={this.state.roleid} 
+          reset={this.setStateToDefault}
           user={this.state.currentUser} />
-        <Form userid={this.state.userid} view={this.state.currentView} submitAction={this.submitAction()} key={Math.random()} />
-        <ResultsTable view={this.state.currentView} users={this.state.users} reimbursements={this.state.reimbursements}
-          updateFunction={this.updateAction()} key={Math.random()} />
+        <Form 
+          userid={this.state.userid} 
+          view={this.state.currentView} 
+          submitAction={this.submitAction()} 
+          key={Math.random()} />
+        <ResultsTable 
+          view={this.state.currentView} 
+          users={this.state.users} 
+          reimbursements={this.paginate(this.state.reimbursements)}
+          updateFunction={this.updateAction()} 
+          key={Math.random()} 
+          updatePagination={this.updatePagination}
+          paginationValue={this.state.paginationValue} />
       </div>
     );
   };

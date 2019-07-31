@@ -98,45 +98,11 @@
   margin: 15px 6px 2px 6px;
 
 }
-/* 
-#content-container form {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: stretch;
-  min-width: 0;
-  flex-grow: 1;
-}
 
-form > * { 
-  justify-content: space-evenly;
-  min-width: 0;
-  flex-grow: 1;
+#pagination-input { 
+  width: 40px;
+  text-align: center;
 }
-
-#content-container div { 
-  display: flex;
-  flex-direction: row;
-  padding-bottom: 200px;
-  background-color: rgb(23, 118, 241);
+#pagination-div { 
+  padding: 6px;  
 }
-
-#form > input, label, select { 
-  height: 76px;
-}
-
-#form-button { 
-  height: 68px;
-  
-}
-
-#form-container { 
-  vertical-align: middle;
-  align-items: center;
-}
-
-#content-container label { 
-  background-color:  rgb(103, 152, 216);
-  line-height: 4.5;
-}
-*/
