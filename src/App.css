@@ -85,7 +85,8 @@
   flex-direction: row;
   justify-content: center;
   padding:10px 10px 50px 10px; 
-  background: linear-gradient( rgb(255, 143, 91), white);
+  background: linear-gradient( rgb(117, 222, 236), white);
+  /* background: linear-gradient( rgb(255, 143, 91), white); */
   /* background-color: rgb(255, 143, 91); */
   height: 200px;
 }
