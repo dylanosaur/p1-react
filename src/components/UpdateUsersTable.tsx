@@ -41,7 +41,7 @@ export default class UpdateUsersTable extends React.Component<any, any> {
                   onChange={this.updateInputValue} /></td>
                 <td><input type='text' id={'u' + x.userId + 'lastname'} value={this.state['u' + x.userId + 'lastname'] || x.lastName}
                   onChange={this.updateInputValue} /></td>
-                <td><input type='text' id={'u' + x.userId + 'password'} value={this.state['u' + x.userId + 'password'] || x.password}
+                <td><input type='password' id={'u' + x.userId + 'password'} value={this.state['u' + x.userId + 'password'] || x.password}
                   onChange={this.updateInputValue} /></td>
                 <td>
                   <select id={'u' + x.userId + 'roleid'} name='type' value={this.state['u' + x.userId + 'roleid'] || x.roleId} onChange={this.updateInputValue} >
