@@ -242,9 +242,9 @@ export default class ContentContainer extends React.Component<any, any>{
   updateUser = async (updateUserBody: any) => {
     const url = 'http://ec2-18-222-87-238.us-east-2.compute.amazonaws.com:3000/users'
     if (!updateUserBody.password) { delete updateUserBody.password }
-    //console.log('request has body', updateUserBody);
-    await patch(url, updateUserBody);
-    ////console.log(response)
+    console.log('request has body', updateUserBody);
+    let response = await patch(url, updateUserBody);
+    console.log(response)
     this.filterUsers(this.state.userFilters);
   }
 
