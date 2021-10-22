@@ -21,14 +21,16 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "tether": "^1.4.7",
-    "typescript": "3.5.3"
+    "typescript": "3.5.3",
+    "@snyk/protect": "latest"
   },
-
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prepare": "npm run snyk-protect",
+    "snyk-protect": "snyk-protect"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -49,5 +51,6 @@
     "@types/enzyme": "^3.10.3",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0"
-  }
+  },
+  "snyk": true
 }
